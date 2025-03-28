@@ -2,15 +2,12 @@
 
 import { GalleryVerticalEnd } from 'lucide-react'
 
-import { useAuth } from '@/auth'
 import { LoginForm } from '@/components/login-form'
 import { SiteConfig } from '@/lib/site-config'
 import Image from 'next/image'
 import Link from 'next/link'
 
 export default function LoginPage() {
-	const { login } = useAuth()
-
 	return (
 		<div className="grid min-h-svh lg:grid-cols-2">
 			<div className="flex flex-col gap-4 p-6 md:p-10">

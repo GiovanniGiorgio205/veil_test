@@ -1,4 +1,5 @@
 import { prisma } from '@/lib/prisma'
+import { checkPassword } from '@/lib/utils'
 import { NextRequest, NextResponse } from 'next/server'
 
 /* eslint-disable @typescript-eslint/no-unused-vars */
@@ -8,10 +9,10 @@ export async function HEAD(request: Request) {}
 
 export async function POST(req: NextRequest) {
 	const body = await req.json()
-	const { email, password } = body
+	const { login, password } = body
 
 	try {
-		const user = await prisma.users.findUnique({ where: { email } })
+		const user = await prisma.users.findUnique({ where: { login } })
 
 		if (!user) {
 			return NextResponse.json(
@@ -20,9 +21,9 @@ export async function POST(req: NextRequest) {
 			)
 		}
 
-		const isValidPassword = await bcrypt.compare(
-			password,
-			user.encryptedPassword
+		const isValidPassword = checkPassword(
+			user.encryptedPassword as string,
+			password
 		)
 
 		if (!isValidPassword) {
