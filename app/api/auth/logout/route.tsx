@@ -2,7 +2,6 @@ import { prisma } from '@/lib/prisma'
 import { jwtVerify } from 'jose'
 import { NextRequest, NextResponse } from 'next/server'
 
-/* eslint-disable @typescript-eslint/no-unused-vars */
 export async function GET(request: Request) {}
 
 export async function HEAD(request: Request) {}

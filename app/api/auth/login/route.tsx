@@ -3,7 +3,6 @@ import { checkPassword } from '@/lib/utils'
 import { SignJWT } from 'jose'
 import { NextRequest, NextResponse } from 'next/server'
 
-/* eslint-disable @typescript-eslint/no-unused-vars */
 export async function GET(request: Request) {}
 
 export async function HEAD(request: Request) {}

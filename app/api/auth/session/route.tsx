@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
 import { prisma } from '@/lib/prisma'
 import { jwtVerify } from 'jose'
 import { NextRequest, NextResponse } from 'next/server'
