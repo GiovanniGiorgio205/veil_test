@@ -22,7 +22,7 @@ export interface HealthCheck {
 	defaultPollingInterval?: number
 }
 
-export type SystemHealthStatus = {
+export interface SystemHealthStatus {
 	status: HealthStatus
 	checks: HealthCheckResult[]
 	timestamp: string

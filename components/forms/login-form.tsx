@@ -10,7 +10,7 @@ import { useRouter } from 'next/navigation'
 import { useState } from 'react'
 import { useForm } from 'react-hook-form'
 import * as z from 'zod'
-import { Alert, AlertDescription } from './ui/alert'
+import { Alert, AlertDescription } from '../ui/alert'
 import {
 	Card,
 	CardContent,
@@ -18,7 +18,7 @@ import {
 	CardFooter,
 	CardHeader,
 	CardTitle,
-} from './ui/card'
+} from '../ui/card'
 import {
 	Form,
 	FormControl,
@@ -26,7 +26,7 @@ import {
 	FormItem,
 	FormLabel,
 	FormMessage,
-} from './ui/form'
+} from '../ui/form'
 
 const formSchema = z.object({
 	login: z.string().min(2, { message: 'Please enter a valid login' }),
@@ -52,7 +52,6 @@ export function LoginForm({ className }: React.ComponentProps<'form'>) {
 		setError(null)
 		try {
 			await login(values.login, values.password)
-			router.push('/dashboard')
 		} catch (err) {
 			setError(
 				err instanceof Error ? err.message : 'Login failed. Please try again.'

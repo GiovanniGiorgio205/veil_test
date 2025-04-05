@@ -1,12 +1,18 @@
 'use client'
 
+import { account_type, Workspaces } from '@prisma/client'
 import { useRouter } from 'next/navigation'
 import { createContext, useContext, useEffect, useState } from 'react'
 
 type User = {
 	id: string
+	login: string
 	email: string
 	displayName: string | null
+	image: string
+	birthdayDate: Date
+	type: account_type
+	Workspaces: Workspaces[]
 }
 
 type Session = {
@@ -18,6 +24,15 @@ type AuthContextType = {
 	user: User | null
 	session: Session | null
 	login: (email: string, password: string) => Promise<void>
+	signup: (
+		login: string,
+		display_name: string,
+		email: string,
+		password: string,
+		password_verify: string,
+		birthday_date: Date,
+		image: string
+	) => Promise<void>
 	logout: () => Promise<void>
 	isLoading: boolean
 }
@@ -61,13 +76,53 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 				const sessionData = await response.json()
 				setSession(sessionData)
 				setUser(sessionData.user)
-				router.push('/dashboard')
+				router.push('/workspaces')
 			} else {
 				const errorData = await response.json()
 				throw new Error(errorData.error || 'Login failed')
 			}
 		} catch (error) {
 			console.error('Login error:', error)
+			throw error
+		} finally {
+			setIsLoading(false)
+		}
+	}
+
+	async function signup(
+		login: string,
+		display_name: string,
+		email: string,
+		password: string,
+		password_verify: string,
+		birthday_date: Date,
+		image: string
+	) {
+		setIsLoading(true)
+		try {
+			const response = await fetch('/api/auth/signup', {
+				method: 'POST',
+				headers: { 'Content-Type': 'application/json' },
+				body: JSON.stringify({
+					login,
+					display_name,
+					email,
+					password,
+					password_verify,
+					birthday_date,
+					image,
+				}),
+			})
+			if (response.ok) {
+				const signupData = await response.json()
+				console.info(signupData)
+				router.push('/login')
+			} else {
+				const errorData = await response.json()
+				throw new Error(errorData.error || 'Signup failed')
+			}
+		} catch (error) {
+			console.error('Signup error:', error)
 			throw error
 		} finally {
 			setIsLoading(false)
@@ -93,7 +148,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 	}
 
 	return (
-		<AuthContext.Provider value={{ user, session, login, logout, isLoading }}>
+		<AuthContext.Provider
+			value={{ user, session, login, signup, logout, isLoading }}
+		>
 			{children}
 		</AuthContext.Provider>
 	)

@@ -2,7 +2,7 @@ import { prisma } from '@/lib/prisma'
 import type { HealthCheck, HealthCheckResult } from '../types'
 
 export const databaseHealthCheck: HealthCheck = {
-	name: 'database',
+	name: 'Supabase DB',
 	type: 'database',
 	defaultPollingInterval: 30000,
 
@@ -23,13 +23,14 @@ export const databaseHealthCheck: HealthCheck = {
 				responseTime: `${responseTime}ms`,
 				timestamp: new Date().toISOString(),
 				details: {
-					provider: 'postgresql',
-					// You could add more details like connection pool stats if available
+					provider: 'Prisma',
 				},
 			}
 		} catch (error) {
 			const endTime = Date.now()
 			const responseTime = endTime - startTime
+
+			console.error('Database health check failed:', error)
 
 			return {
 				status: 'unhealthy',
@@ -40,7 +41,7 @@ export const databaseHealthCheck: HealthCheck = {
 				responseTime: `${responseTime}ms`,
 				timestamp: new Date().toISOString(),
 				details: {
-					provider: 'postgresql',
+					provider: 'Prisma',
 				},
 			}
 		}

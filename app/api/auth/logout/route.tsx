@@ -1,4 +1,5 @@
 import { prisma } from '@/lib/prisma'
+import { jwtVerify } from 'jose'
 import { NextRequest, NextResponse } from 'next/server'
 
 /* eslint-disable @typescript-eslint/no-unused-vars */
@@ -11,9 +12,16 @@ export async function POST(req: NextRequest) {
 
 	if (sessionToken) {
 		try {
-			await prisma.session.delete({
-				where: { sessionToken },
-			})
+			// Verify the JWT token
+			const secret = new TextEncoder().encode(process.env.JWT_SECRET)
+			const { payload } = await jwtVerify(sessionToken, secret)
+
+			// Delete the session from the database
+			if (payload.sessionId) {
+				await prisma.session.delete({
+					where: { id: payload.sessionId as string },
+				})
+			}
 		} catch (error) {
 			console.error('Logout error:', error)
 		}
@@ -23,7 +31,7 @@ export async function POST(req: NextRequest) {
 	response.cookies.set('session-token', '', {
 		httpOnly: true,
 		secure: process.env.NODE_ENV === 'production',
-		sameSite: 'strict',
+		sameSite: 'lax',
 		maxAge: 0,
 		path: '/',
 	})

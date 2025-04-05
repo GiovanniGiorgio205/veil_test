@@ -6,6 +6,7 @@ import type { Metadata } from 'next'
 import { ThemeProvider } from 'next-themes'
 import { Geist, Geist_Mono } from 'next/font/google'
 import './globals.css'
+import { TooltipProvider } from '@radix-ui/react-tooltip'
 
 const geistSans = Geist({
 	variable: '--font-geist-sans',
@@ -40,9 +41,11 @@ export default function RootLayout({
 				>
 					<HealthIndicatorProvider pollingInterval={15000}>
 						<AuthProvider>
-							<div className="relative flex min-h-screen flex-col justify-stretch">
-								<div className="flex-1">{children}</div>
-							</div>
+							<TooltipProvider>
+								<div className="relative flex min-h-screen flex-col justify-stretch">
+									<div className="flex-1">{children}</div>
+								</div>
+							</TooltipProvider>
 						</AuthProvider>
 					</HealthIndicatorProvider>
 				</ThemeProvider>

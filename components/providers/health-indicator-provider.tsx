@@ -39,6 +39,7 @@ export function HealthIndicatorProvider({
 	// Load preferences from localStorage
 	const [visible, setVisible] = useState(true)
 	const [position, setPosition] = useState<IndicatorPosition>('bottom-right')
+	const [initialized, setInitialized] = useState(false)
 
 	// Load saved preferences on mount
 	useEffect(() => {
@@ -64,19 +65,28 @@ export function HealthIndicatorProvider({
 	// Initialize health checks on the client side
 	useEffect(() => {
 		const initializeChecks = async () => {
-			const { initializeHealthChecks } = await import('@/lib/health')
-			initializeHealthChecks()
+			try {
+				console.log('Initializing health checks from provider...')
+				const { initializeHealthChecks } = await import('@/lib/health')
+				initializeHealthChecks()
+				setInitialized(true)
+				console.log('Health checks initialized from provider')
+			} catch (error) {
+				console.error('Failed to initialize health checks:', error)
+			}
 		}
 
-		initializeChecks()
-	}, [])
+		if (!initialized) {
+			initializeChecks()
+		}
+	}, [initialized])
 
 	return (
 		<HealthIndicatorContext.Provider
 			value={{ visible, setVisible, position, setPosition }}
 		>
 			{children}
-			{visible && (
+			{visible && initialized && (
 				<HealthIndicator
 					pollingInterval={pollingInterval}
 					position={position}

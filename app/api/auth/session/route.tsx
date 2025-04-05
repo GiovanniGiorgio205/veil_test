@@ -1,5 +1,6 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import { prisma } from '@/lib/prisma'
+import { jwtVerify } from 'jose'
 import { NextRequest, NextResponse } from 'next/server'
 
 export async function GET(req: NextRequest) {
@@ -10,20 +11,26 @@ export async function GET(req: NextRequest) {
 	}
 
 	try {
-		const session = await prisma.session.findUnique({
-			where: { sessionToken },
-			include: {
-				user: {
-					select: {
-						id: true,
-						email: true,
-						displayName: true,
-					},
-				},
+		// Verify the JWT token
+		const secret = new TextEncoder().encode(process.env.JWT_SECRET)
+		const { payload } = await jwtVerify(sessionToken, secret)
+
+		// Get the user from the database
+		const user = await prisma.users.findUnique({
+			where: { id: payload.userId as string },
+			select: {
+				id: true,
+				login: true,
+				email: true,
+				displayName: true,
+				birthdayDate: true,
+				image: true,
+				type: true,
+				Workspaces: true,
 			},
 		})
 
-		if (!session) {
+		if (!user) {
 			const response = NextResponse.json(
 				{ error: 'Invalid session' },
 				{ status: 401 }
@@ -31,22 +38,7 @@ export async function GET(req: NextRequest) {
 			response.cookies.set('session-token', '', {
 				httpOnly: true,
 				secure: process.env.NODE_ENV === 'production',
-				sameSite: 'strict',
-				maxAge: 0,
-				path: '/',
-			})
-			return response
-		}
-
-		if (new Date(session.expires) < new Date()) {
-			const response = NextResponse.json(
-				{ error: 'Session expired' },
-				{ status: 401 }
-			)
-			response.cookies.set('session-token', '', {
-				httpOnly: true,
-				secure: process.env.NODE_ENV === 'production',
-				sameSite: 'strict',
+				sameSite: 'lax',
 				maxAge: 0,
 				path: '/',
 			})
@@ -54,15 +46,23 @@ export async function GET(req: NextRequest) {
 		}
 
 		return NextResponse.json({
-			user: session.user,
-			expires: session.expires.toISOString(),
+			user,
+			expires: new Date(payload.exp! * 1000).toISOString(),
 		})
 	} catch (error) {
 		console.error('Session check error:', error)
-		return NextResponse.json(
-			{ error: 'Internal server error' },
-			{ status: 500 }
+		const response = NextResponse.json(
+			{ error: 'Invalid session' },
+			{ status: 401 }
 		)
+		response.cookies.set('session-token', '', {
+			httpOnly: true,
+			secure: process.env.NODE_ENV === 'production',
+			sameSite: 'lax',
+			maxAge: 0,
+			path: '/',
+		})
+		return response
 	}
 }
 

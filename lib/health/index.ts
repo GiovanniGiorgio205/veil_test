@@ -5,24 +5,42 @@ import type { SystemHealthStatus } from './types'
 
 // Initialize with default health checks
 export function initializeHealthChecks() {
+	// Only initialize once
+	if (healthService.isInitialized()) {
+		console.log('Health checks already initialized, skipping')
+		return
+	}
+
+	console.log('Initializing health checks...')
+
 	// Register database health check
 	healthService.registerCheck(databaseHealthCheck)
 
-	// Register external API health checks if configured
-	// Example: checking if a critical third-party API is available
+	// Register external API health check if configured
 	if (process.env.EXTERNAL_API_URL) {
 		healthService.registerCheck(
 			createApiHealthCheck('external-api', process.env.EXTERNAL_API_URL)
 		)
 	}
 
-	// You can add more health checks here as needed
+	// Mark as initialized
+	healthService.setInitialized(true)
+
+	console.log('Health checks initialized with:', [
+		...healthService.getAllChecks().map((c) => c.name),
+	])
 }
 
 // Helper function to run all health checks
 export async function checkSystemHealth(
 	forceRefresh = false
 ): Promise<SystemHealthStatus> {
+	// Ensure health checks are initialized
+	if (!healthService.isInitialized()) {
+		console.log('Health checks not initialized, initializing now...')
+		initializeHealthChecks()
+	}
+
 	return healthService.runAllChecks({
 		timeout: 5000,
 		forceRefresh,

@@ -1,6 +1,6 @@
 import { MainHeader } from '@/components/main-header'
 
-export default function Home() {
+export default async function Home() {
 	return (
 		<>
 			<MainHeader />

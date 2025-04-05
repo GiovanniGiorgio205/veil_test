@@ -1,9 +1,13 @@
 import type {
 	HealthCheck,
+	HealthCheckOptions,
 	HealthCheckResult,
 	HealthStatus,
 	SystemHealthStatus,
 } from './types'
+
+// Use a global variable to track initialization state
+let isInitialized = false
 
 class HealthService {
 	private checks: Map<string, HealthCheck> = new Map()
@@ -12,10 +16,14 @@ class HealthService {
 	private cacheTimeout = 5000 // 5 seconds cache
 
 	registerCheck(check: HealthCheck): void {
+		console.log(`Registering health check: ${check.name} (${check.type})`)
 		this.checks.set(check.name, check)
+		// Log the current checks after registration
+		console.log(`Current health checks: ${[...this.checks.keys()].join(', ')}`)
 	}
 
 	unregisterCheck(name: string): void {
+		console.log(`Unregistering health check: ${name}`)
 		this.checks.delete(name)
 		this.cache.delete(name)
 	}
@@ -25,15 +33,24 @@ class HealthService {
 	}
 
 	getAllChecks(): HealthCheck[] {
-		return Array.from(this.checks.values())
+		const checks = Array.from(this.checks.values())
+		console.log(
+			`Getting all health checks: ${checks.map((c) => c.name).join(', ')}`
+		)
+		return checks
+	}
+
+	isInitialized(): boolean {
+		return isInitialized
+	}
+
+	setInitialized(value: boolean): void {
+		isInitialized = value
 	}
 
 	async runCheck(
 		name: string,
-		options?: {
-			timeout?: number
-			forceRefresh?: boolean
-		}
+		options?: HealthCheckOptions
 	): Promise<HealthCheckResult> {
 		const check = this.checks.get(name)
 		if (!check) {
@@ -50,12 +67,12 @@ class HealthService {
 			}
 		}
 
-		const startTime = Date.now()
-
 		try {
 			// Add timeout if specified
+			let result: HealthCheckResult
+
 			if (options?.timeout) {
-				const result = await Promise.race([
+				result = await Promise.race([
 					check.check(options),
 					new Promise<HealthCheckResult>((_, reject) =>
 						setTimeout(
@@ -64,46 +81,68 @@ class HealthService {
 						)
 					),
 				])
-
-				// Cache the result
-				this.cache.set(name, { result, timestamp: Date.now() })
-
-				return result
+			} else {
+				result = await check.check(options)
 			}
 
-			const result = await check.check(options)
+			// Ensure the result has all required fields
+			const validatedResult: HealthCheckResult = {
+				status: result.status || 'unknown',
+				name: result.name || check.name,
+				type: result.type || check.type,
+				responseTime: result.responseTime || '0ms',
+				timestamp: result.timestamp || new Date().toISOString(),
+				details: result.details || {},
+				error: result.error,
+			}
 
 			// Cache the result
-			this.cache.set(name, { result, timestamp: Date.now() })
+			this.cache.set(name, { result: validatedResult, timestamp: Date.now() })
 
-			return result
+			return validatedResult
 		} catch (error) {
-			const endTime = Date.now()
-			const responseTime = endTime - startTime
-
-			const result = {
+			const errorResult: HealthCheckResult = {
 				status: 'unhealthy',
 				name: check.name,
 				type: check.type,
 				error: error instanceof Error ? error.message : 'Unknown error',
-				responseTime: `${responseTime}ms`,
+				responseTime: '0ms',
 				timestamp: new Date().toISOString(),
 			}
 
 			// Cache the error result too
-			this.cache.set(name, { result, timestamp: Date.now() })
+			this.cache.set(name, { result: errorResult, timestamp: Date.now() })
 
-			return result
+			return errorResult
 		}
 	}
 
-	async runAllChecks(options?: {
-		timeout?: number
-		forceRefresh?: boolean
-	}): Promise<SystemHealthStatus> {
+	async runAllChecks(
+		options?: HealthCheckOptions
+	): Promise<SystemHealthStatus> {
 		const checks = this.getAllChecks()
+
+		// If no checks are registered, return a default status
+		if (checks.length === 0) {
+			console.warn('No health checks registered when running all checks')
+			return {
+				status: 'unknown',
+				checks: [],
+				timestamp: new Date().toISOString(),
+			}
+		}
+
 		const results = await Promise.all(
-			checks.map((check) => this.runCheck(check.name, options))
+			checks.map((check) =>
+				this.runCheck(check.name, options).catch((error) => ({
+					status: 'unhealthy' as const,
+					name: check.name,
+					type: check.type,
+					error: error instanceof Error ? error.message : 'Unknown error',
+					responseTime: '0ms',
+					timestamp: new Date().toISOString(),
+				}))
+			)
 		)
 
 		// Determine overall system status

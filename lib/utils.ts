@@ -1,7 +1,7 @@
 import { clsx, type ClassValue } from 'clsx'
 import { twMerge } from 'tailwind-merge'
 
-import SHA256 from 'crypto-ts'
+import * as crypto from 'crypto'
 
 export function cn(...inputs: ClassValue[]) {
 	return twMerge(clsx(inputs))
@@ -11,8 +11,20 @@ export function checkPassword(
 	encryptedPassword: string,
 	inputPassword: string
 ) {
-	if (SHA256.SHA256(inputPassword) == encryptedPassword) {
+	if (
+		crypto.createHash('sha256').update(inputPassword).digest('hex') ==
+		encryptedPassword
+	) {
 		return true
 	}
 	return false
+}
+
+export function hashPassword(inputPassword: string) {
+	const hashedPass = crypto
+		.createHash('sha256')
+		.update(inputPassword)
+		.digest('hex')
+	console.log(hashedPass)
+	return hashedPass
 }
