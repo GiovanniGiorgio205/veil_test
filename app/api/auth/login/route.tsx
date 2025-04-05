@@ -20,7 +20,10 @@ export async function POST(req: NextRequest) {
 			)
 		}
 
-		const isValidPassword = checkPassword(user.encryptedPassword, password)
+		const isValidPassword = checkPassword(
+			user.encryptedPassword as string,
+			password
+		)
 
 		if (!isValidPassword) {
 			return NextResponse.json(
