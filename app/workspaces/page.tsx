@@ -21,7 +21,7 @@ export default function WorkspacesPage() {
 					{user?.Workspaces.map((workspace) => (
 						<Card key={workspace.ID} className="h-150px"></Card>
 					))}
-					{user?.Workspaces.length < 10 ? (
+					{(user?.Workspaces.length ? user?.Workspaces.length : 0) < 10 ? (
 						<Button
 							variant={'outline'}
 							className="flex flex-col gap-2 h-[150px]"
