@@ -79,7 +79,6 @@ export async function POST(req: NextRequest) {
 				birthdayDate: user.birthdayDate,
 				image: user.image,
 				type: user.type,
-				Workspaces: user.Workspaces,
 			},
 			expires: session.expires.toISOString(),
 		})
