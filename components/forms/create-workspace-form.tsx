@@ -3,6 +3,13 @@
 import { useAuth } from '@/auth'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
+import {
+	Select,
+	SelectContent,
+	SelectItem,
+	SelectTrigger,
+	SelectValue,
+} from '@/components/ui/select'
 import { cn } from '@/lib/utils'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { WS_Type } from '@prisma/client'
@@ -23,11 +30,13 @@ import {
 import {
 	Form,
 	FormControl,
+	FormDescription,
 	FormField,
 	FormItem,
 	FormLabel,
 	FormMessage,
 } from '../ui/form'
+import { Textarea } from '../ui/textarea'
 
 const formSchema = z.object({
 	name: z.string().min(2, { message: 'Please enter a valid workspace name' }),
@@ -42,7 +51,7 @@ const formSchema = z.object({
 export function CreateWorkspaceForm({
 	className,
 }: React.ComponentProps<'form'>) {
-	const { signup } = useAuth()
+	const { createWorkspace, user } = useAuth()
 	const [error, setError] = useState<string | null>(null)
 	const router = useRouter()
 
@@ -52,22 +61,21 @@ export function CreateWorkspaceForm({
 			name: '',
 			tenant: '',
 			description: '',
-			ws_type: WS_Type,
-			uid: '',
+			ws_type: WS_Type.Personal,
+			uid: user?.id,
 		},
 	})
 
 	async function onSubmit(values: z.infer<typeof formSchema>) {
 		setError(null)
 		try {
-			await signup(
+			await createWorkspace(
 				values.name,
 				values.tenant,
 				values.description,
-				values.ws_type,
+				values.ws_type as WS_Type,
 				values.uid
 			)
-			router.push('/login')
 		} catch (err) {
 			setError(
 				err instanceof Error
@@ -78,7 +86,7 @@ export function CreateWorkspaceForm({
 	}
 
 	return (
-		<Card className={cn(className, 'w-full max-w-lg')}>
+		<Card className={cn(className, 'w-full max-w-2xl')}>
 			<CardHeader className="space-y-1">
 				<CardTitle className="text-2xl font-bold tracking-tight">
 					Create workspace
@@ -99,12 +107,12 @@ export function CreateWorkspaceForm({
 					<form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
 						<FormField
 							control={form.control}
-							name="login"
+							name="name"
 							render={({ field }) => (
 								<FormItem>
-									<FormLabel>Login</FormLabel>
+									<FormLabel>Name</FormLabel>
 									<FormControl>
-										<Input placeholder="example_user" {...field} />
+										<Input placeholder="Example Name" {...field} />
 									</FormControl>
 									<FormMessage />
 								</FormItem>
@@ -112,17 +120,63 @@ export function CreateWorkspaceForm({
 						/>
 						<FormField
 							control={form.control}
-							name="display_name"
+							name="tenant"
 							render={({ field }) => (
 								<FormItem>
-									<FormLabel>Display Name</FormLabel>
+									<FormLabel>Tenant</FormLabel>
 									<FormControl>
-										<Input placeholder="Example User" {...field} />
+										<Input placeholder="example_tenant" {...field} />
 									</FormControl>
 									<FormMessage />
 								</FormItem>
 							)}
 						/>
+						<FormField
+							control={form.control}
+							name="description"
+							render={({ field }) => (
+								<FormItem>
+									<FormLabel>Description</FormLabel>
+									<FormControl>
+										<Textarea placeholder="Describe it somehow" {...field} />
+									</FormControl>
+									<FormMessage />
+								</FormItem>
+							)}
+						/>
+						<FormField
+							control={form.control}
+							name="ws_type"
+							render={({ field }) => (
+								<FormItem>
+									<FormLabel>Type</FormLabel>
+									<Select
+										onValueChange={field.onChange}
+										defaultValue={field.value as string}
+									>
+										<FormControl>
+											<SelectTrigger className="w-full">
+												<SelectValue
+													placeholder={Object.values(WS_Type).at(0)}
+												/>
+											</SelectTrigger>
+										</FormControl>
+										<SelectContent>
+											{Object.values(WS_Type).map((x) => (
+												<SelectItem key={x} value={x}>
+													{x}
+												</SelectItem>
+											))}
+										</SelectContent>
+									</Select>
+									<FormDescription>
+										You can manage workspace type in the settings
+									</FormDescription>
+									<FormMessage />
+								</FormItem>
+							)}
+						/>
+						<input type="hidden" {...form.register('uid')} />
 						<Button type="submit" className="w-full">
 							Create Workspace
 						</Button>

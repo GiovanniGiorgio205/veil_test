@@ -151,14 +151,14 @@ export function LoginForm({ className }: React.ComponentProps<'form'>) {
 						Sign up
 					</a>
 				</div>
-				<div className="text-sm text-center text-muted-foreground">
+				{/* <div className="text-sm text-center text-muted-foreground">
 					<a
 						href="/forgot-password"
 						className="underline underline-offset-4 hover:text-primary"
 					>
 						Forgot your password?
 					</a>
-				</div>
+				</div> */}
 			</CardFooter>
 		</Card>
 	)

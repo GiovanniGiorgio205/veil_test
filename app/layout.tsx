@@ -2,11 +2,11 @@ import { AuthProvider } from '@/auth'
 import CookieConsent from '@/components/cookie-consent'
 import { HealthIndicatorProvider } from '@/components/providers/health-indicator-provider'
 import { SiteConfig } from '@/lib/site-config'
+import { TooltipProvider } from '@radix-ui/react-tooltip'
 import type { Metadata } from 'next'
 import { ThemeProvider } from 'next-themes'
 import { Geist, Geist_Mono } from 'next/font/google'
 import './globals.css'
-import { TooltipProvider } from '@radix-ui/react-tooltip'
 
 const geistSans = Geist({
 	variable: '--font-geist-sans',

@@ -77,7 +77,6 @@ export function RegisterForm({ className }: React.ComponentProps<'form'>) {
 				values.birthday_date,
 				values.image
 			)
-			router.push('/login')
 		} catch (err) {
 			setError(
 				err instanceof Error
@@ -294,22 +293,22 @@ export function RegisterForm({ className }: React.ComponentProps<'form'>) {
 			</CardContent>
 			<CardFooter className="flex flex-col space-y-2">
 				<div className="text-sm text-center text-muted-foreground">
-					Don{"'"}t have an account?{' '}
+					Already have an account?{' '}
 					<a
-						href="/register"
+						href="/login"
 						className="underline underline-offset-4 hover:text-primary"
 					>
-						Sign up
+						Sign in
 					</a>
 				</div>
-				<div className="text-sm text-center text-muted-foreground">
+				{/* <div className="text-sm text-center text-muted-foreground">
 					<a
 						href="/forgot-password"
 						className="underline underline-offset-4 hover:text-primary"
 					>
 						Forgot your password?
 					</a>
-				</div>
+				</div> */}
 			</CardFooter>
 		</Card>
 	)

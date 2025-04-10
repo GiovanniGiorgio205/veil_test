@@ -6,7 +6,7 @@ export default function WorkspacesLayout({
 	children: React.ReactNode
 }) {
 	return (
-		<section>
+		<section className="flex flex-col min-h-svh">
 			<MainHeader />
 			{children}
 		</section>

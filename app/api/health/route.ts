@@ -8,9 +8,9 @@ import { NextResponse } from 'next/server'
 export async function GET(request: Request) {
 	// Ensure health checks are initialized
 	if (!healthService.isInitialized()) {
-		console.log(
-			'Health checks not initialized in API route, initializing now...'
-		)
+		// console.log(
+		// 	'Health checks not initialized in API route, initializing now...'
+		// )
 		initializeHealthChecks()
 	}
 

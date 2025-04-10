@@ -6,6 +6,7 @@ import { NextRequest, NextResponse } from 'next/server'
 export async function GET(request: Request) {}
 
 export async function HEAD(request: Request) {}
+
 export async function POST(req: NextRequest) {
 	const body = await req.json()
 	const { login, password } = body

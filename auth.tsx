@@ -1,6 +1,6 @@
 'use client'
 
-import { account_type, Workspaces } from '@prisma/client'
+import { account_type, Workspaces, WS_Type } from '@prisma/client'
 import { useRouter } from 'next/navigation'
 import { createContext, useContext, useEffect, useState } from 'react'
 
@@ -33,6 +33,13 @@ type AuthContextType = {
 		birthday_date: Date,
 		image: string
 	) => Promise<void>
+	createWorkspace: (
+		name: string,
+		tenant: string,
+		description: string,
+		ws_type: WS_Type,
+		uid: string
+	) => Promise<void>
 	logout: () => Promise<void>
 	isLoading: boolean
 }
@@ -49,7 +56,34 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 		checkSession()
 	}, [])
 
+	async function createWorkspace(
+		name: string,
+		tenant: string,
+		description: string,
+		ws_type: WS_Type,
+		uid: string
+	) {
+		setIsLoading(true)
+		try {
+			const response = await fetch('/api/workspaces/create', {
+				method: 'POST',
+				headers: { 'Content-Type': 'application/json' },
+				body: JSON.stringify({ name, tenant, description, ws_type, uid }),
+			})
+			if (response.ok) {
+				const data = await response.json()
+				console.log(data)
+				router.push('/workspaces')
+			}
+		} catch (error) {
+			console.error('Failed to create workspaces:', error)
+		} finally {
+			setIsLoading(false)
+		}
+	}
+
 	async function checkSession() {
+		setIsLoading(true)
 		try {
 			const response = await fetch('/api/auth/session')
 			if (response.ok) {
@@ -149,7 +183,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
 	return (
 		<AuthContext.Provider
-			value={{ user, session, login, signup, logout, isLoading }}
+			value={{
+				user,
+				session,
+				login,
+				signup,
+				logout,
+				createWorkspace,
+				isLoading,
+			}}
 		>
 			{children}
 		</AuthContext.Provider>

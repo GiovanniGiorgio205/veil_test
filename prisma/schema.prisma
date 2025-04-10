@@ -98,10 +98,10 @@ model Users {
 
 model Workspaces {
   ID           String         @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  Name         String?
-  Domain_Name  String         @unique
-  Description  String?
-  Access_Token String?
+  name         String?
+  tenant       String         @unique
+  description  String?
+  access_token String?
   WS_Type      WS_Type?
   UID          String?        @unique @db.Uuid
   Applications Applications[]

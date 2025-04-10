@@ -20,7 +20,7 @@ export async function POST(req: NextRequest) {
 
 	try {
 		const user = await prisma.users.findUnique({ where: { login } })
-		console.log('Step 1')
+
 		// https://i.pinimg.com/736x/fb/7e/c1/fb7ec1c340c75820d03934cfaa947cfb.jpg
 		if (user) {
 			return NextResponse.json(
@@ -28,7 +28,6 @@ export async function POST(req: NextRequest) {
 				{ status: 401 }
 			)
 		}
-		console.log('Step 2')
 
 		const isValidPassword = password === password_verify
 
@@ -38,7 +37,6 @@ export async function POST(req: NextRequest) {
 				{ status: 401 }
 			)
 		}
-		console.log('Step 3')
 
 		const created_user = await prisma.users.create({
 			data: {
@@ -52,7 +50,6 @@ export async function POST(req: NextRequest) {
 					: image,
 			},
 		})
-		console.log('Step 4')
 		if (created_user) {
 			const response = NextResponse.json(
 				{
@@ -72,7 +69,7 @@ export async function POST(req: NextRequest) {
 			)
 		}
 	} catch (error) {
-		console.error('Login error:', error)
+		console.error('Sign up error:', error)
 		return NextResponse.json(
 			{ error: 'Internal server error' },
 			{ status: 500 }
