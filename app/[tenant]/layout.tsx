@@ -1,3 +1,5 @@
+'use client'
+
 import { MainHeader } from '@/components/main-header'
 
 export default function TenantLayout({
@@ -7,7 +9,8 @@ export default function TenantLayout({
 }) {
 	return (
 		<section className="flex flex-col min-h-svh">
-			<MainHeader /> {children}
+			<MainHeader />
+			{children}
 		</section>
 	)
 }

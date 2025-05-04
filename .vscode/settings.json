@@ -1,3 +1,9 @@
 {
-	"WillLuke.nextjs.hasPrompted": true
+	"WillLuke.nextjs.hasPrompted": true,
+	"Codegeex.GenerationPreference": "automatic",
+	"Codegeex.Chat.fontSize": 12,
+	"Codegeex.Chat.LanguagePreference": "中文",
+	"Codegeex.Comment.LanguagePreference": "中文",
+	"Codegeex.CommitMessage.LanguagePreference": "中文",
+	"Codegeex.CommitMessageStyle": "ConventionalCommits"
 }

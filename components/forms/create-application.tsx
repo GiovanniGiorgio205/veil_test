@@ -30,32 +30,40 @@ import {
 } from '../ui/form'
 
 const formSchema = z.object({
-	login: z.string().min(2, { message: 'Please enter a valid login' }),
-	password: z
+	applicationName: z
 		.string()
-		.min(6, { message: 'Password must be at least 6 characters' }),
+		.min(2, { message: 'Please enter a valid application name' }),
+	applicationTenant: z
+		.string()
+		.min(2, { message: 'Please enter a valid application tenant' }),
+	ws_id: z.string(),
 })
 
-export function LoginForm({ className }: React.ComponentProps<'form'>) {
-	const { login } = useAuth()
+export function CreateApplicationForm({ className = '', ws_id = '' }) {
+	const { createApplication, isLoading } = useAuth()
 	const [error, setError] = useState<string | null>(null)
 	const router = useRouter()
 
 	const form = useForm<z.infer<typeof formSchema>>({
 		resolver: zodResolver(formSchema),
 		defaultValues: {
-			login: '',
-			password: '',
+			applicationName: '',
+			applicationTenant: '',
+			ws_id: ws_id,
 		},
 	})
 
 	async function onSubmit(values: z.infer<typeof formSchema>) {
 		setError(null)
 		try {
-			await login(values.login, values.password)
+			await createApplication(
+				values.applicationName,
+				values.applicationTenant,
+				values.ws_id
+			)
 			notificationService.success(
-				'Login successful',
-				`Welcome back, ${values.login}!`
+				'Application created successfully',
+				`Great work, ten'kan!`
 			)
 		} catch (err) {
 			setError(
@@ -68,10 +76,11 @@ export function LoginForm({ className }: React.ComponentProps<'form'>) {
 		<Card className={cn(className, 'w-full max-w-lg')}>
 			<CardHeader className="space-y-1">
 				<CardTitle className="text-2xl font-bold tracking-tight">
-					Sign in to your account
+					Create application
 				</CardTitle>
 				<CardDescription>
-					Enter your login and password to sign in
+					Enter credentials to create application. Not book, but there will be a
+					lot of information too.
 				</CardDescription>
 			</CardHeader>
 			<CardContent className="space-y-4">
@@ -86,12 +95,12 @@ export function LoginForm({ className }: React.ComponentProps<'form'>) {
 					<form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
 						<FormField
 							control={form.control}
-							name="login"
+							name="applicationName"
 							render={({ field }) => (
 								<FormItem>
-									<FormLabel>Login</FormLabel>
+									<FormLabel>Application Name</FormLabel>
 									<FormControl>
-										<Input placeholder="example_user" {...field} />
+										<Input placeholder="Example Application" {...field} />
 									</FormControl>
 									<FormMessage />
 								</FormItem>
@@ -99,19 +108,19 @@ export function LoginForm({ className }: React.ComponentProps<'form'>) {
 						/>
 						<FormField
 							control={form.control}
-							name="password"
+							name="applicationTenant"
 							render={({ field }) => (
 								<FormItem>
-									<FormLabel>Password</FormLabel>
+									<FormLabel>Application Tenant</FormLabel>
 									<FormControl>
-										<Input type="password" placeholder="••••••••" {...field} />
+										<Input placeholder="example_tenant" {...field} />
 									</FormControl>
 									<FormMessage />
 								</FormItem>
 							)}
 						/>
-						<Button type="submit" className="w-full">
-							Sign in
+						<Button type="submit" className="w-full" disabled={isLoading}>
+							Create application
 						</Button>
 					</form>
 				</Form>
@@ -147,7 +156,7 @@ export function LoginForm({ className }: React.ComponentProps<'form'>) {
 					)} */}
 			</CardContent>
 			<CardFooter className="flex flex-col space-y-2">
-				<div className="text-sm text-center text-muted-foreground">
+				{/* <div className="text-sm text-center text-muted-foreground">
 					Don{"'"}t have an account?{' '}
 					<a
 						href="/register"
@@ -155,7 +164,7 @@ export function LoginForm({ className }: React.ComponentProps<'form'>) {
 					>
 						Sign up
 					</a>
-				</div>
+				</div> */}
 				{/* <div className="text-sm text-center text-muted-foreground">
 					<a
 						href="/forgot-password"

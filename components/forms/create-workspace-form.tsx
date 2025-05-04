@@ -10,6 +10,7 @@ import {
 	SelectTrigger,
 	SelectValue,
 } from '@/components/ui/select'
+import { notificationService } from '@/hooks/use-notifications'
 import { cn } from '@/lib/utils'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { WS_Type } from '@prisma/client'
@@ -75,6 +76,10 @@ export function CreateWorkspaceForm({
 				values.description,
 				values.ws_type as WS_Type,
 				values.uid
+			)
+			notificationService.success(
+				'Workspace created successfully',
+				`Workspace '${values.name}' @${values.tenant} created as ${values.ws_type} workspace`
 			)
 		} catch (err) {
 			setError(

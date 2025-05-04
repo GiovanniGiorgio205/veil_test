@@ -1,9 +1,19 @@
+'use client'
+
+import { CreateApplicationForm } from '@/components/forms/create-application'
 import { SiteConfig } from '@/lib/site-config'
 import { GalleryVerticalEnd } from 'lucide-react'
 import Image from 'next/image'
 import Link from 'next/link'
+import { use } from 'react'
 
-export default function CreateApplicationPage() {
+export default function CreateApplicationPage({
+	params,
+}: {
+	params: Promise<{ tenant: string }>
+}) {
+	const { tenant } = use(params)
+
 	return (
 		<div className="grid lg:grid-cols-[2fr_1fr] flex-1">
 			<div className="flex flex-col gap-4 p-6 md:p-10">
@@ -16,7 +26,9 @@ export default function CreateApplicationPage() {
 					</Link>
 				</div>
 				<div className="flex flex-1 items-center justify-center">
-					<div className="w-full max-w-lg"></div>
+					<div className="w-full max-w-lg">
+						<CreateApplicationForm ws_id={tenant} />
+					</div>
 				</div>
 			</div>
 			<div className="bg-muted relative hidden lg:block">

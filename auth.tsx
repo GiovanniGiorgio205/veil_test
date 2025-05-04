@@ -1,7 +1,7 @@
 'use client'
 
 import { account_type, Workspaces, WS_Type } from '@prisma/client'
-import { useRouter } from 'next/navigation'
+import { useRouter, useSearchParams } from 'next/navigation'
 import { createContext, useContext, useEffect, useState } from 'react'
 
 type User = {
@@ -40,6 +40,11 @@ type AuthContextType = {
 		ws_type: WS_Type,
 		uid: string
 	) => Promise<void>
+	createApplication: (
+		applicationName: string,
+		applicationTenant: string,
+		ws_id: string
+	) => Promise<void>
 	logout: () => Promise<void>
 	isLoading: boolean
 }
@@ -52,9 +57,35 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 	const [isLoading, setIsLoading] = useState(true)
 	const router = useRouter()
 
+	const searchParams = useSearchParams()
+
 	useEffect(() => {
 		checkSession()
 	}, [])
+
+	async function createApplication(
+		applicationName: string,
+		applicationTenant: string,
+		ws_id: string
+	) {
+		setIsLoading(true)
+		try {
+			const response = await fetch('/api/applications/create', {
+				method: 'POST',
+				headers: { 'Content-Type': 'application/json' },
+				body: JSON.stringify({ applicationName, applicationTenant, ws_id }),
+			})
+			if (response.ok) {
+				const data = await response.json()
+				console.log(data)
+				router.push(`../${ws_id}/${data.application.ID}`)
+			}
+		} catch (error) {
+			console.error('Failed to create workspaces:', error)
+		} finally {
+			setIsLoading(false)
+		}
+	}
 
 	async function createWorkspace(
 		name: string,
@@ -98,7 +129,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 		}
 	}
 
-	async function login(login: string, password: string) {
+	async function Login(login: string, password: string) {
 		setIsLoading(true)
 		try {
 			const response = await fetch('/api/auth/login', {
@@ -110,7 +141,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 				const sessionData = await response.json()
 				setSession(sessionData)
 				setUser(sessionData.user)
-				router.push('/workspaces')
+
+				const callbackUrl = searchParams.get('callbackUrl')
+
+				if (callbackUrl) {
+					router.push(callbackUrl)
+				} else {
+					router.push('/workspaces')
+				}
 			} else {
 				const errorData = await response.json()
 				throw new Error(errorData.error || 'Login failed')
@@ -186,10 +224,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 			value={{
 				user,
 				session,
-				login,
+				login: Login,
 				signup,
 				logout,
 				createWorkspace,
+				createApplication,
 				isLoading,
 			}}
 		>

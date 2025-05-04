@@ -27,33 +27,35 @@ model Account {
 }
 
 model AppUsers {
-  id                 String        @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  login              String?
-  email              String?
-  encrypted_password String?
-  recovery_code      String?
-  role               String?       @default("12k-904")
-  created_at         DateTime?     @default(now()) @db.Timestamptz(6)
-  updated_at         DateTime?     @default(now()) @db.Timestamptz(6)
-  instance_id        String?       @db.Uuid
-  birthday_date      DateTime?     @db.Date
-  displayName        String?
-  Applications       Applications? @relation(fields: [instance_id], references: [ID], onDelete: NoAction, onUpdate: NoAction)
-
-  @@unique([id, login, email])
+  id                String        @id(map: "App_Users_pkey") @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  login             String        @unique
+  email             String        @unique
+  role              String?       @default("12k-904")
+  birthdayDate      DateTime?     @db.Timestamptz(6)
+  createdAt         DateTime?     @default(now()) @db.Timestamptz(6)
+  displayName       String?
+  emailVerified     DateTime?
+  encryptedPassword String?
+  image             String?
+  recoveryCode      String?
+  updatedAt         DateTime?     @default(now()) @db.Timestamptz(6)
+  type              account_type? @default(Free)
+  app_id            String?       @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  Applications      Applications? @relation(fields: [app_id], references: [ID], onDelete: Cascade)
 }
 
 model Applications {
-  ID              String        @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  ApplicationName String?
-  Secret_Key      String        @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  API_Token       String        @default(dbgenerated("generate_api_token()"))
-  Created_At      DateTime?     @default(now()) @db.Timestamptz(6)
-  WS_ID           String?       @db.Uuid
-  Updated_At      DateTime?     @default(now()) @db.Timestamptz(6)
-  AppUsers        AppUsers[]
-  Workspaces      Workspaces?   @relation(fields: [WS_ID], references: [ID], onDelete: NoAction, onUpdate: NoAction, map: "ws_fk")
-  SSOProvider     SSOProvider[]
+  ID                String        @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  ApplicationName   String?
+  Secret_Key        String        @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  API_Token         String        @default(dbgenerated("generate_api_token()"))
+  Created_At        DateTime?     @default(now()) @db.Timestamptz(6)
+  WS_ID             String?       @db.Uuid
+  Updated_At        DateTime?     @default(now()) @db.Timestamptz(6)
+  ApplicationTenant String        @unique @default("")
+  AppUsers          AppUsers[]
+  Workspaces        Workspaces?   @relation(fields: [WS_ID], references: [ID], onDelete: NoAction, onUpdate: NoAction, map: "ws_fk")
+  SSOProvider       SSOProvider[]
 }
 
 model SSOProvider {
@@ -98,12 +100,12 @@ model Users {
 
 model Workspaces {
   ID           String         @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  name         String?
-  tenant       String         @unique
-  description  String?
-  access_token String?
   WS_Type      WS_Type?
   UID          String?        @unique @db.Uuid
+  access_token String?
+  description  String?
+  name         String?
+  tenant       String         @unique
   Applications Applications[]
   Users        Users?         @relation(fields: [UID], references: [id], onDelete: NoAction, onUpdate: NoAction)
 

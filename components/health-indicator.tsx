@@ -234,7 +234,7 @@ export function HealthIndicator({
 				variant="outline"
 				size="sm"
 				onClick={() => setExpanded(!expanded)}
-				className={cn('shadow-md rounded-full', getButtonColor())}
+				className={cn('shadow-md rounded-md', getButtonColor())}
 			>
 				{loading ? (
 					<Loader2 className="h-4 w-4 animate-spin mr-2" />

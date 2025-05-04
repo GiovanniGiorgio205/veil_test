@@ -71,7 +71,7 @@ export default function CookieConsent({ variant = "default", demo = false, onAcc
             </div>
         ) : variant == "small" && (
             <div className={cn("fixed z-[200] bottom-0 left-0 right-0 sm:left-4 sm:bottom-4 w-full sm:max-w-md duration-700", !isOpen ? "transition-[opacity,transform] translate-y-8 opacity-0" : "transition-[opacity,transform] translate-y-0 opacity-100", hide && "hidden")}>
-                <div className="m-3 dark:bg-card bg-background border border-border rounded-lg">
+                <div className="m-3 dark:bg-card bg-background border border-border rounded-md">
                     <div className="flex items-center justify-between p-3">
                         <h1 className="text-lg font-medium">We use cookies</h1>
                         <CookieIcon className="h-[1.2rem] w-[1.2rem]" />
@@ -82,8 +82,8 @@ export default function CookieConsent({ variant = "default", demo = false, onAcc
                         </p>
                     </div>
                     <div className="p-3 flex items-center gap-2 mt-2 border-t">
-                        <Button onClick={accept} className="flex-1 h-9 rounded-full">Accept</Button>
-                        <Button onClick={decline} className="flex-1 h-9 rounded-full" variant="outline">Decline</Button>
+                        <Button onClick={accept} className="flex-1 h-9 rounded-md">Accept</Button>
+                        <Button onClick={decline} className="flex-1 h-9 rounded-md" variant="outline">Decline</Button>
                     </div>
                 </div>
             </div>
